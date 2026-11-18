@@ -45,7 +45,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {s.instagram && <a href={s.instagram} target="_blank" rel="noopener">Instagram</a>}
           {s.address && <span>{s.address}</span>}
         </div>
-        <Link href="/admin/" className="s-staff">دخول الخدّامين</Link>
       </footer>
     </div>
   );
