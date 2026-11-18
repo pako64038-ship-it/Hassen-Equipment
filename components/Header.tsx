@@ -16,6 +16,8 @@ export function Logo() {
   );
 }
 
+import Link from 'next/link';
+
 export default function Header() {
   return (
     <header className="top">
@@ -28,6 +30,7 @@ export default function Header() {
           <p>Pack 3D Designer · Concevez · Équipez · Réalisez</p>
         </div>
       </div>
+      <Link href="/" className="btn small">← المتجر</Link>
     </header>
   );
 }
