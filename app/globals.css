@@ -289,3 +289,11 @@ body{background:radial-gradient(1200px 600px at 50% -10%,#1d1830 0%,var(--bg) 60
 .soonbox p{margin:6px 0 0;color:var(--muted);font-size:13px}
 .ftypes{border:1px solid var(--line);border-radius:8px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0}
 .ftypes legend{font-size:12px;color:var(--muted);padding:0 4px}
+
+/* Admin */
+.dialog.wide{max-width:920px}
+.atabs{grid-template-columns:repeat(4,1fr)}
+.adm-t td{vertical-align:middle}
+.adm-t .btn{padding:3px 8px;font-size:12px}
+#adminBtn{margin-inline-start:auto;font-size:13px;padding:7px 12px}
+.mform input[type=number][data-pq]{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-family:var(--f-num)}
