@@ -4,7 +4,7 @@ import { useCart } from '@/lib/cart';
 
 export function Logo() {
   return (
-    <svg className="logo he" viewBox="0 0 100 100" aria-label="Hassen Equipment">
+    <svg className="logo he" viewBox="0 0 100 100" width="46" height="46" aria-label="Hassen Equipment">
       <circle cx="50" cy="50" r="49" fill="#fff" />
       <path d="M12 36 L50 14 L88 36" fill="none" stroke="#1F2147" strokeWidth="8" strokeLinejoin="miter" />
       <path d="M18 70 L50 88 L82 70" fill="none" stroke="#1F2147" strokeWidth="8" />
