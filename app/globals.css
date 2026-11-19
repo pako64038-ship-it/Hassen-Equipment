@@ -72,6 +72,7 @@ button{cursor:pointer}
 .openings{display:grid;gap:10px}
 .opening{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:8px;align-items:end}
 .opening>b{font-size:13px;padding-bottom:8px;min-width:44px}
+.opening.door{grid-template-columns:1.3fr 1fr 1fr 1fr}.opening.door>b{grid-column:1/-1;padding:0}
 .ai{background:var(--surface-2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .ai p{margin:0;color:var(--muted);font-size:13px}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -176,7 +177,7 @@ table.budget td.nm{direction:ltr;text-align:right}
   .pane{overflow:visible}
   .hint{display:none}
 }
-@media (max-width:420px){.opening{grid-template-columns:1fr 1fr 1fr}.opening>b{grid-column:1/-1;padding:0}.grid2{grid-template-columns:1fr}}
+@media (max-width:420px){.opening,.opening.door{grid-template-columns:1fr 1fr 1fr}.opening.door .field:first-of-type{grid-column:1/-1}.opening>b{grid-column:1/-1;padding:0}.grid2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 
 /* ---- Snack 3D Designer skin ---- */

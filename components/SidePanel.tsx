@@ -1,7 +1,16 @@
 function Opening({ label, prefix, wMin, wMax }: { label: string; prefix: 'door' | 'win'; wMin: number; wMax: number }) {
   return (
-    <div className="opening">
+    <div className={`opening ${prefix}`}>
       <b>{label}</b>
+      {prefix === 'door' && (
+        <div className="field">
+          <label htmlFor="doorKind">النوع</label>
+          <select id="doorKind" defaultValue="porte">
+            <option value="porte">باب زجاج</option>
+            <option value="rideau">ريدو · Rideau (garage)</option>
+          </select>
+        </div>
+      )}
       <div className="field">
         <label htmlFor={`${prefix}Wall`}>الحائط</label>
         <select id={`${prefix}Wall`} />
@@ -46,11 +55,11 @@ export default function SidePanel() {
         <p className="shape-note" id="shapeNote" hidden>
           <span /> <button type="button" className="a-link" id="shapeReset">رجّع مستطيل</button>
         </p>
-        <details className="more">
-          <summary>الباب والنافذة</summary>
-          <p className="lead">الموضع = المسافة من بداية الحائط</p>
+        <details className="more" open>
+          <summary>الباب / الريدو والنافذة</summary>
+          <p className="lead">الموضع = المسافة من بداية الحائط. ما عندكش نافذة؟ اختار «بلا نافذة».</p>
           <div className="openings">
-            <Opening label="الباب" prefix="door" wMin={0.8} wMax={4} />
+            <Opening label="المدخل" prefix="door" wMin={0.8} wMax={8} />
             <Opening label="النافذة" prefix="win" wMin={0.5} wMax={8} />
           </div>
         </details>
