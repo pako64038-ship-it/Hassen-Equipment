@@ -4,12 +4,26 @@ import { useState } from 'react';
 import { addToCart } from '@/lib/cart';
 import { fmt, type Pack, type Product } from '@/lib/supabase';
 
+/** Product photo, or a clean branded card with the product name when no photo exists yet. */
 export function Img({ src, alt }: { src?: string; alt: string }) {
-  return src ? <img src={src} alt={alt} loading="lazy" /> : <span className="s-noimg">الصورة جاية قريب</span>;
+  if (src) return <img src={src} alt={alt} loading="lazy" />;
+  const [main, ...rest] = alt.split(' · ');
+  return (
+    <span className="s-noimg" role="img" aria-label={alt}>
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="10" y="22" width="44" height="30" rx="4" fill="none" stroke="currentColor" strokeWidth="3" />
+        <path d="M10 32h44M22 22v-6h20v6M20 42h8" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="44" cy="42" r="3" fill="currentColor" />
+      </svg>
+      <b>{main}</b>
+      {rest.length > 0 && <small>{rest.join(' · ')}</small>}
+      <em>Hassen Equipment</em>
+    </span>
+  );
 }
 
 export function ProductCard({ p, onAdded }: { p: Product; onAdded?: (n: string) => void }) {
-  const [mi, setMi] = useState(0);
+  const [mi, setMi] = useState(() => Math.max(0, p.product_models.findIndex((x) => x.price != null)));
   const m = p.product_models[mi] || p.product_models[0];
   if (!m) return null;
   const img = m.images[0] || p.product_models.find((x) => x.images[0])?.images[0];
