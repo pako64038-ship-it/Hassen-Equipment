@@ -6,8 +6,7 @@ import { useCart } from '@/lib/cart';
 import { useSettings } from './useSettings';
 
 const NAV = [
-  { href: '/', label: 'الرئيسية' },
-  { href: '/produits/', label: 'المعدات' },
+  { href: '/', label: 'المعدات' },
   { href: '/designer/', label: 'صمّم محلّك 3D' },
 ];
 
