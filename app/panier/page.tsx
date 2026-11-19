@@ -5,7 +5,7 @@ import Shell from '@/components/store/Shell';
 import { Img } from '@/components/store/Cards';
 import { useSettings } from '@/components/store/useSettings';
 import { clearCart, setQty, useCart } from '@/lib/cart';
-import { fmt, PROJECT_TYPES, supabase } from '@/lib/supabase';
+import { BASE, fmt, PROJECT_TYPES, supabase } from '@/lib/supabase';
 
 export default function Panier() {
   const s = useSettings();
@@ -60,6 +60,10 @@ export default function Panier() {
               ))}
               <div className="s-total"><span>المجموع</span><b className="num">{fmt(total)}{unknown ? ' +' : ''}</b></div>
               {unknown && <p className="s-muted">كاين منتجات «حسب الطلب»: البائع يأكدلك السعر.</p>}
+              <div className="s-try3d">
+                <div><b>جرّب هاذو المعدات في محلّك بالـ3D</b><span>دخّل القياس تاع المحل وشوف كيفاش يجيو قبل ما تطلب.</span></div>
+                <a className="btn primary" href={BASE + '/designer/?from=cart'}>شوف في محلّي 3D</a>
+              </div>
             </div>
             <form className="s-form" onSubmit={send}>
               <h2>طلب Devis</h2>

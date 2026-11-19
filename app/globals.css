@@ -458,3 +458,8 @@ a.btn{text-decoration:none;color:var(--ink)}
 a.btn.primary{color:var(--accent-ink)}
 
 .s-card-img{text-decoration:none;color:inherit}
+
+.s-try3d{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;padding:12px;border:1px dashed var(--accent);border-radius:12px;background:var(--accent-soft)}
+.s-try3d div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.s-try3d span{color:var(--muted);font-size:13px}
+.top-links{display:flex;gap:6px;flex-wrap:wrap;margin-inline-start:auto}

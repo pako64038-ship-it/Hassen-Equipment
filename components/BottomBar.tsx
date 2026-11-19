@@ -33,7 +33,8 @@ export default function BottomBar() {
       </button>
       <div className="actions">
         <button className="btn" id="btnShot">صورة 3D</button>
-        <button className="btn primary" id="btnDevis">اطلب Devis</button>
+        <button className="btn" id="btnDevis">Devis واتساب</button>
+        <button className="btn primary" id="btnCart">حط في السلة</button>
       </div>
     </footer>
   );

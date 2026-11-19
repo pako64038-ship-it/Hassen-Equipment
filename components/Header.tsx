@@ -1,3 +1,7 @@
+'use client';
+import Link from 'next/link';
+import { useCart } from '@/lib/cart';
+
 export function Logo() {
   return (
     <svg className="logo he" viewBox="0 0 100 100" aria-label="Hassen Equipment">
@@ -16,9 +20,9 @@ export function Logo() {
   );
 }
 
-import Link from 'next/link';
-
+/** Header of the 3D designer page. */
 export default function Header() {
+  const { count } = useCart();
   return (
     <header className="top">
       <div className="brand">
@@ -30,7 +34,10 @@ export default function Header() {
           <p>Pack 3D Designer · Concevez · Équipez · Réalisez</p>
         </div>
       </div>
-      <Link href="/" className="btn small">← المتجر</Link>
+      <nav className="top-links">
+        <Link href="/" className="btn small">← المتجر</Link>
+        <Link href="/panier/" className="btn small">السلة {count > 0 && <span className="num">({count})</span>}</Link>
+      </nav>
     </header>
   );
 }

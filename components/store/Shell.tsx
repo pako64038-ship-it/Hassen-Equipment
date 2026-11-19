@@ -3,11 +3,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/Header';
 import { useCart } from '@/lib/cart';
+import { BASE } from '@/lib/supabase';
 import { useSettings } from './useSettings';
 
+// The 3D designer always opens with a full page load, so its engine starts fresh.
 const NAV = [
   { href: '/', label: 'المعدات' },
-  { href: '/designer/', label: 'صمّم محلّك 3D' },
+  { href: '/designer/', label: 'صمّم محلّك 3D', reload: true },
 ];
 
 export default function Shell({ children }: { children: React.ReactNode }) {
@@ -23,9 +25,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <span><b>{s.store_name}</b><small>{s.tagline}</small></span>
         </Link>
         <nav className="s-nav" aria-label="القائمة">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={path === n.href || (n.href !== '/' && path.startsWith(n.href)) ? 'page' : undefined}>{n.label}</Link>
-          ))}
+          {NAV.map((n) => {
+            const cur = path === n.href || (n.href !== '/' && path.startsWith(n.href)) ? 'page' : undefined;
+            return n.reload
+              ? <a key={n.href} href={BASE + n.href} aria-current={cur}>{n.label}</a>
+              : <Link key={n.href} href={n.href} aria-current={cur}>{n.label}</Link>;
+          })}
           <Link href="/panier/" className="s-cart" aria-current={path.startsWith('/panier') ? 'page' : undefined}>
             السلة {count > 0 && <span className="num">{count}</span>}
           </Link>
