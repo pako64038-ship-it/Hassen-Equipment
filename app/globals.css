@@ -463,3 +463,9 @@ a.btn.primary{color:var(--accent-ink)}
 .s-try3d div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .s-try3d span{color:var(--muted);font-size:13px}
 .top-links{display:flex;gap:6px;flex-wrap:wrap;margin-inline-start:auto}
+
+/* Plan 2D */
+.pl-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pl-cv{display:block;width:100%;height:min(58vh,480px);touch-action:none;border-radius:12px;border:1px solid var(--line);background:var(--surface-2)}
+.shape-note{margin:0;font-size:12.5px;color:var(--accent);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dimrow input:disabled{opacity:.5}

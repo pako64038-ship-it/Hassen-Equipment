@@ -42,6 +42,10 @@ export default function SidePanel() {
         <DimRow id="inW" label="العرض (m)" min={2} max={30} />
         <DimRow id="inH" label="العلو (m)" min={2.4} max={6} />
         <button className="btn primary" id="btnSuggest">طبّق · Appliquer</button>
+        <button className="btn" id="btnPlan">ارسم شكل المحل · Plan 2D</button>
+        <p className="shape-note" id="shapeNote" hidden>
+          <span /> <button type="button" className="a-link" id="shapeReset">رجّع مستطيل</button>
+        </p>
         <details className="more">
           <summary>الباب والنافذة</summary>
           <p className="lead">الموضع = المسافة من بداية الحائط</p>
