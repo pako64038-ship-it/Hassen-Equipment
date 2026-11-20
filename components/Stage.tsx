@@ -10,6 +10,7 @@ export default function Stage() {
         <div className="views glass" role="group" aria-label="زاوية الكاميرا">
           <button id="v3d" aria-pressed="true">3D</button>
           <button id="vtop" aria-pressed="false">المخطط</button>
+          <button data-clearall className="clearall" title="نحّي كامل المعدات من المحل">حذف الكل</button>
         </div>
       </div>
       <div className="toast glass" id="toast" hidden />
@@ -29,6 +30,7 @@ export default function Stage() {
             <button className="btn small" id="hoodPlus" aria-label="تطويل">+</button>
           </span>
           <button className="btn small danger" id="selDel">حذف</button>
+          <button className="btn small danger" data-clearall>حذف الكل</button>
         </div>
       </div>
     </main>
