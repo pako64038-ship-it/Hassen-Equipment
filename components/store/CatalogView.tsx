@@ -22,8 +22,8 @@ export default function CatalogView() {
     (!q || (p.name + ' ' + p.product_models.map((m) => m.name).join(' ')).toLowerCase().includes(q.toLowerCase()))
   ), [data, type, cat, q]); // eslint-disable-line react-hooks/exhaustive-deps
   const packs = (data?.packs || []).filter((k) => fitsType(k.project_types) && !cat && !q);
-  const modelName: Record<string, string> = {};
-  data?.products.forEach((p) => p.product_models.forEach((x) => (modelName[x.id] = `${p.name} · ${x.name}`)));
+  const modelInfo: Record<string, { name: string; image?: string; price: number | null }> = {};
+  data?.products.forEach((p) => p.product_models.forEach((x) => (modelInfo[x.id] = { name: `${p.name} · ${x.name}`, image: x.images[0], price: x.price == null ? null : Number(x.price) })));
   const added = (n: string) => { setToast(`تزاد للسلة: ${n}`); setTimeout(() => setToast(''), 2500); };
 
   return (
@@ -52,7 +52,7 @@ export default function CatalogView() {
       )}
       {packs.length > 0 && (
         <section className="s-sec"><h2>الـPacks</h2><div className="s-grid">
-          {packs.map((k) => <PackCard key={k.id} k={k} onAdded={added} names={k.pack_items.map((it) => modelName[it.model_id]).filter(Boolean)} />)}
+          {packs.map((k) => <PackCard key={k.id} k={k} onAdded={added} items={k.pack_items.filter((it) => modelInfo[it.model_id]).map((it) => ({ ...modelInfo[it.model_id], qty: it.qty }))} />)}
         </div></section>
       )}
       <Toast text={toast} />

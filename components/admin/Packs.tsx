@@ -8,7 +8,11 @@ function Editor({ k, products, onClose }: { k: Pack | null; products: Product[];
   const [items, setItems] = useState<Record<string, number>>(Object.fromEntries((k?.pack_items || []).map((i) => [i.model_id, i.qty])));
   const { msg, flash } = useFlash();
   const [busy, setBusy] = useState(false);
-  const models = products.flatMap((p) => p.product_models.map((m) => ({ id: m.id, name: `${p.name} · ${m.name}`, price: m.price })));
+  const models = products.flatMap((p) => p.product_models.map((m) => ({ id: m.id, name: `${p.name} · ${m.name}`, price: m.price, image: m.images[0] || p.product_models.find((x) => x.images[0])?.images[0] || '' })));
+  const [q, setQ] = useState('');
+  const chosen = models.filter((m) => (items[m.id] || 0) > 0);
+  const found = q.trim() ? models.filter((m) => m.name.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 40) : [];
+  const setQty = (id: string, n: number) => setItems({ ...items, [id]: Math.max(0, Math.min(50, n)) });
   const sum = models.reduce((s, m) => s + (items[m.id] || 0) * (m.price || 0), 0);
   async function save(e: React.FormEvent) {
     e.preventDefault(); if (!v.name.trim()) return; setBusy(true);
@@ -30,7 +34,7 @@ function Editor({ k, products, onClose }: { k: Pack | null; products: Product[];
           <label>السعر (DA)<input type="number" min={0} step={500} value={v.price} onChange={(e) => setV({ ...v, price: Number(e.target.value) })} required /></label>
           <label>الترتيب<input type="number" value={v.sort} onChange={(e) => setV({ ...v, sort: Number(e.target.value) || 0 })} /></label>
         </div>
-        <label>الوصف<textarea rows={3} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} /></label>
+        <label>الوصف <small className="s-muted">(اختياري: المحتوى يبان وحدو بالتصاور والأسعار)</small><textarea rows={2} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} /></label>
         <TypesPicker value={v.project_types} onChange={(x) => setV({ ...v, project_types: x })} />
         <div className="row">
           <label className="check"><input type="checkbox" checked={v.featured} onChange={(e) => setV({ ...v, featured: e.target.checked })} /> يبان في الرئيسية</label>
@@ -39,13 +43,26 @@ function Editor({ k, products, onClose }: { k: Pack | null; products: Product[];
         <ImagesField value={v.images} onChange={(x) => setV({ ...v, images: x })} folder="packs" />
       </div>
       <div className="a-card">
-        <h3>المحتوى</h3>
+        <h3>المحتوى <small className="s-muted">({chosen.reduce((n, m) => n + (items[m.id] || 0), 0)} قطع)</small></h3>
         {!models.length && <p className="s-muted">زيد المنتجات أول في «المنتجات».</p>}
-        <div className="a-pack-items">{models.map((m) => (
-          <label key={m.id} className="a-pack-item"><span>{m.name} <small className="s-muted num">{fmt(m.price)}</small></span>
-            <input type="number" min={0} max={50} value={items[m.id] || 0} onChange={(e) => setItems({ ...items, [m.id]: Math.max(0, Math.round(Number(e.target.value) || 0)) })} /></label>
+        {chosen.length === 0 && models.length > 0 && <p className="s-muted">الـPack فارغ. قلّب على منتج تحت وزيدو.</p>}
+        <div className="a-pk-list">{chosen.map((m) => (
+          <div key={m.id} className="a-pk">
+            {m.image ? <img src={m.image} alt="" /> : <span className="a-pk-noimg" />}
+            <div className="a-pk-nm"><b>{m.name}</b><span className="num">{fmt(m.price)}{(items[m.id] || 0) > 1 && m.price != null ? ` × ${items[m.id]} = ${fmt(m.price * items[m.id])}` : ''}</span></div>
+            <div className="qty"><button type="button" onClick={() => setQty(m.id, (items[m.id] || 0) - 1)} aria-label="نقّص">−</button><span className="num">{items[m.id]}</span><button type="button" onClick={() => setQty(m.id, (items[m.id] || 0) + 1)} aria-label="زيد">+</button></div>
+          </div>
         ))}</div>
-        {sum > 0 && <p className="s-muted">مجموع الأسعار وحدهم: <span className="num">{fmt(sum)}</span> · سعر الـPack: <span className="num">{fmt(Number(v.price))}</span></p>}
+        <label>زيد منتج للـPack<input value={q} onChange={(e) => setQ(e.target.value)} placeholder="اكتب اسم المنتج، مثلاً: Friteuse" /></label>
+        {found.length > 0 && <div className="a-pk-list">{found.map((m) => (
+          <button type="button" key={m.id} className="a-pk a-pk-add" onClick={() => setQty(m.id, (items[m.id] || 0) + 1)}>
+            {m.image ? <img src={m.image} alt="" /> : <span className="a-pk-noimg" />}
+            <div className="a-pk-nm"><b>{m.name}</b><span className="num">{fmt(m.price)}</span></div>
+            <span className="a-pk-plus">{items[m.id] ? `✓ ${items[m.id]}` : '+ زيد'}</span>
+          </button>
+        ))}</div>}
+        {q.trim() && !found.length && <p className="s-muted">ما لقينا حتى منتج بهذا الاسم.</p>}
+        {sum > 0 && <p className="a-pk-sum">مجموع الأسعار وحدهم: <b className="num">{fmt(sum)}</b> · سعر الـPack: <b className="num">{fmt(Number(v.price))}</b>{sum > Number(v.price) ? <> · الزبون يوفّر <b className="num">{fmt(sum - Number(v.price))}</b></> : null}</p>}
       </div>
       <button className="btn primary" disabled={busy}>{busy ? '…' : 'حفظ الـPack'}</button>
       <Flash msg={msg} />

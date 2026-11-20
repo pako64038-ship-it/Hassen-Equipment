@@ -53,16 +53,35 @@ export function ProductCard({ p, onAdded }: { p: Product; onAdded?: (n: string) 
   );
 }
 
-export function PackCard({ k, names, onAdded }: { k: Pack; names: string[]; onAdded?: (n: string) => void }) {
+export type PackLine = { name: string; image?: string; price: number | null; qty: number };
+
+export function PackCard({ k, items, onAdded }: { k: Pack; items: PackLine[]; onAdded?: (n: string) => void }) {
+  const known = items.every((x) => x.price != null);
+  const sum = items.reduce((s, x) => s + (x.price || 0) * x.qty, 0);
+  const save = known && sum > k.price ? sum - k.price : 0;
   return (
     <article className="s-card s-pack">
-      <div className="s-card-img"><Img src={k.images[0]} alt={k.name} /></div>
+      <div className="s-card-img"><Img src={k.images[0] || items.find((x) => x.image)?.image} alt={k.name} /></div>
       <div className="s-card-body">
-        <span className="s-eyebrow">PACK</span>
+        <span className="s-eyebrow">PACK · {items.reduce((s, x) => s + x.qty, 0)} قطع</span>
         <h3>{k.name}</h3>
-        {names.length > 0 && <ul className="s-list">{names.map((n, i) => <li key={i}>{n}</li>)}</ul>}
-        <div className="s-price"><b className="num">{fmt(k.price)}</b></div>
-        <button className="btn primary" onClick={() => { addToCart({ kind: 'pack', id: k.id, name: k.name, price: k.price, image: k.images[0] }); onAdded?.(k.name); }}>
+        {items.length > 0 && (
+          <ul className="s-pack-items">
+            {items.map((x, i) => (
+              <li key={i}>
+                <span className="s-pack-img"><Img src={x.image} alt={x.name} /></span>
+                <span className="s-pack-nm">{x.name}{x.qty > 1 && <b className="num"> × {x.qty}</b>}</span>
+                <span className={x.price == null ? 's-muted' : 'num'}>{fmt(x.price == null ? null : x.price * x.qty)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="s-price">
+          <b className="num">{fmt(k.price)}</b>
+          {save > 0 && <s className="num">{fmt(sum)}</s>}
+        </div>
+        {save > 0 && <p className="s-save">توفّر <span className="num">{fmt(save)}</span> كي تشري الـPack</p>}
+        <button className="btn primary" onClick={() => { addToCart({ kind: 'pack', id: k.id, name: k.name, price: k.price, image: k.images[0] || items.find((x) => x.image)?.image }); onAdded?.(k.name); }}>
           زيد للسلة
         </button>
       </div>
