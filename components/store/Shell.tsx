@@ -47,6 +47,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener">WhatsApp</a>}
           {s.facebook && <a href={s.facebook} target="_blank" rel="noopener">Facebook</a>}
           {s.instagram && <a href={s.instagram} target="_blank" rel="noopener">Instagram</a>}
+          {s.tiktok && <a href={s.tiktok} target="_blank" rel="noopener">TikTok</a>}
           {s.address && <span>{s.address}</span>}
         </div>
       </footer>

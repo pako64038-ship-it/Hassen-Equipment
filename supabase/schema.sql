@@ -279,3 +279,4 @@ do $$ begin
     alter publication supabase_realtime add table public.orders;
   end if;
 end $$;
+alter table public.settings add column if not exists tiktok text not null default '';

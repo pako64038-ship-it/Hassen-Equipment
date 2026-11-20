@@ -8,7 +8,7 @@ import { PAYMENTS, WILAYAS } from '@/lib/delivery';
 const FIELDS: [keyof Settings, string, string?][] = [
   ['store_name', 'اسم المتجر'], ['tagline', 'الشعار (تحت الاسم)'], ['hero_title', 'العنوان الكبير في الرئيسية'], ['hero_text', 'النص في الرئيسية', 'area'],
   ['phone', 'الهاتف اللي يبان'], ['whatsapp', 'رقم الواتساب (بالـ213 بلا 0، مثلاً 213556554548)'], ['email', 'الإيميل'], ['address', 'العنوان'],
-  ['facebook', 'رابط Facebook'], ['instagram', 'رابط Instagram'],
+  ['facebook', 'رابط Facebook'], ['instagram', 'رابط Instagram'], ['tiktok', 'رابط TikTok'],
 ];
 
 export default function SettingsTab() {
@@ -29,7 +29,7 @@ export default function SettingsTab() {
         {FIELDS.map(([k, label, kind]) => (
           <label key={k}>{label}{kind === 'area'
             ? <textarea rows={3} value={String(v[k] || '')} onChange={(e) => setV({ ...v, [k]: e.target.value })} />
-            : <input value={String(v[k] || '')} onChange={(e) => setV({ ...v, [k]: e.target.value })} dir={['whatsapp', 'email', 'facebook', 'instagram'].includes(k) ? 'ltr' : undefined} />}</label>
+            : <input value={String(v[k] || '')} onChange={(e) => setV({ ...v, [k]: e.target.value })} dir={['whatsapp', 'email', 'facebook', 'instagram', 'tiktok'].includes(k) ? 'ltr' : undefined} />}</label>
         ))}
         <div><b>اللوغو</b> <small className="s-muted">(إذا خلّيتو فارغ، يبان اللوغو HE)</small>
           <ImagesField value={v.logo_url ? [v.logo_url] : []} onChange={(x) => setV({ ...v, logo_url: x[x.length - 1] || '' })} folder="brand" /></div>
