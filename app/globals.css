@@ -517,3 +517,5 @@ a.btn.primary{color:var(--accent-ink)}
   .s-card.s-pack .s-card-img img{height:100%;object-fit:cover}
 }
 .s-pack-items li{grid-template-columns:44px minmax(0,1fr) auto}
+.a-gros{color:#7fb4ff}
+.a-wholesale input{border-color:#3b6fb6!important}

@@ -16,14 +16,21 @@ function ModelRow({ m, onSaved, onDeleted }: { m: Partial<Model>; onSaved: (m: M
     setBusy(true); setErr('');
     const row = { product_id: v.product_id, name: v.name.trim(), price: v.price, old_price: v.old_price, stock: v.stock, width_m: v.width_m, depth_m: v.depth_m, height_m: v.height_m, on_counter: v.on_counter, images: v.images || [], sort: v.sort || 0, active: v.active };
     const q = v.id ? supabase.from('product_models').update(row).eq('id', v.id).select().single() : supabase.from('product_models').insert(row).select().single();
-    const { data, error } = await q; setBusy(false);
-    if (error) setErr('ما تحفظش: ' + error.message); else { setV(data as Model); onSaved(data as Model); }
+    const { data, error } = await q;
+    if (error) { setBusy(false); setErr('ما تحفظش: ' + error.message); return; }
+    const saved = data as Model;
+    const w = v.wholesale == null ? await supabase.from('model_wholesale').delete().eq('model_id', saved.id)
+      : await supabase.from('model_wholesale').upsert({ model_id: saved.id, price: v.wholesale, updated_at: new Date().toISOString() });
+    setBusy(false);
+    if (w.error) setErr('الموديل تحفظ، بصح سعر الجملة ما تحفظش: ' + w.error.message);
+    const full = { ...saved, wholesale: v.wholesale ?? null }; setV(full); onSaved(full);
   }
   return (
     <div className="a-model">
       <div className="a-form-row">
         <label className="grow">اسم الموديل<input value={v.name || ''} onChange={(e) => set('name', e.target.value)} placeholder="مثلاً: Comaf 2×8 L" /></label>
         <label>السعر (DA)<input type="number" min={0} step={500} value={v.price ?? ''} onChange={(e) => set('price', num(e.target.value))} placeholder="حسب الطلب" /></label>
+        <label className="a-wholesale">سعر الجملة 🔒<input type="number" min={0} step={500} value={v.wholesale ?? ''} onChange={(e) => set('wholesale', num(e.target.value))} placeholder="—" title="يشوفو غير انت والخدّامين" /></label>
         <label>السعر القديم<input type="number" min={0} step={500} value={v.old_price ?? ''} onChange={(e) => set('old_price', num(e.target.value))} /></label>
         <label>المخزون<input type="number" min={0} value={v.stock ?? ''} onChange={(e) => set('stock', num(e.target.value))} /></label>
       </div>
@@ -119,10 +126,11 @@ export default function Products() {
         </div>
         <button className="btn primary" onClick={() => setEdit('new')}>+ منتج جديد</button></div>
       <div className="a-table-wrap"><table className="budget a-table">
-        <thead><tr><th></th><th>المنتج</th><th>القسم</th><th>الموديلات</th><th>السعر</th><th>الحالة</th><th></th></tr></thead>
+        <thead><tr><th></th><th>المنتج</th><th>القسم</th><th>الموديلات</th><th>السعر</th><th title="يشوفو غير انت والخدّامين">الجملة 🔒</th><th>الحالة</th><th></th></tr></thead>
         <tbody>{list.map((p) => {
           const img = p.product_models.find((m) => m.images[0])?.images[0];
           const prices = p.product_models.map((m) => m.price).filter((x): x is number => x != null);
+          const gros = p.product_models.map((m) => m.wholesale).filter((x): x is number => x != null);
           return (
             <tr key={p.id}>
               <td>{img ? <img src={img} alt="" className="a-row-img" /> : <span className="a-row-img" />}</td>
@@ -130,6 +138,7 @@ export default function Products() {
               <td>{catName(p.category_id)}</td>
               <td>{p.product_models.length}</td>
               <td className="num">{prices.length ? fmt(Math.min(...prices)) : 'حسب الطلب'}</td>
+              <td className="num a-gros">{gros.length ? fmt(Math.min(...gros)) : '—'}</td>
               <td>{p.active ? <span className="a-pill ok">يبان</span> : <span className="a-pill">مخبّي</span>}{p.featured && <span className="a-pill">مختار</span>}</td>
               <td className="row">{p.active
                   ? <button className="btn small" onClick={() => publish(p, false)} title="الزبائن ما يشوفوهش">إخفاء</button>

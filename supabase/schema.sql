@@ -280,3 +280,14 @@ do $$ begin
   end if;
 end $$;
 alter table public.settings add column if not exists tiktok text not null default '';
+-- ============ Wholesale prices (staff only) ============
+create table if not exists public.model_wholesale (
+  model_id uuid primary key references public.product_models(id) on delete cascade,
+  price numeric(14,2) check (price is null or price >= 0),
+  updated_at timestamptz not null default now()
+);
+alter table public.model_wholesale enable row level security;
+drop policy if exists wholesale_staff on public.model_wholesale;
+create policy wholesale_staff on public.model_wholesale for all using (public.is_staff()) with check (public.is_staff());
+revoke all on public.model_wholesale from anon;
+grant select, insert, update, delete on public.model_wholesale to authenticated;

@@ -39,6 +39,7 @@ export type Category = { id: string; slug: string | null; name_ar: string; name_
 export type Model = {
   id: string; product_id: string; name: string; price: number | null; old_price: number | null; stock: number | null;
   width_m: number; depth_m: number; height_m: number; on_counter: boolean; images: string[]; sort: number; active: boolean;
+  wholesale?: number | null; // staff only (table model_wholesale)
 };
 export type Product = {
   id: string; category_id: string | null; name: string; description: string; project_types: string[];
@@ -74,9 +75,12 @@ export async function loadCatalog(staff = false) {
     supabase.from('packs').select('*, pack_items(*)').order('sort'),
   ]);
   const err = c.error || p.error || k.error;
+  // Wholesale prices live in a staff-only table; customers never receive them.
+  const whole: Record<string, number | null> = {};
+  if (staff) { const w = await supabase.from('model_wholesale').select('model_id,price'); (w.data || []).forEach((x: { model_id: string; price: number | null }) => (whole[x.model_id] = x.price == null ? null : Number(x.price))); }
   const products = ((p.data || []) as Product[]).map((x) => ({
     ...x,
-    product_models: (x.product_models || []).filter((m) => staff || m.active).sort(staff ? (a, b) => a.sort - b.sort : byPhoto),
+    product_models: (x.product_models || []).filter((m) => staff || m.active).map((m) => (staff ? { ...m, wholesale: whole[m.id] ?? null } : m)).sort(staff ? (a, b) => a.sort - b.sort : byPhoto),
   }));
   // In the store, products with real photos come first.
   if (!staff) products.sort((a, b) => Math.min(2, ...a.product_models.map(photoRank)) - Math.min(2, ...b.product_models.map(photoRank)) || a.sort - b.sort);
