@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Shell from '@/components/store/Shell';
 import { Img, Toast } from '@/components/store/Cards';
 import { addToCart } from '@/lib/cart';
-import { fmt, PROJECT_TYPES, supabase, type Product } from '@/lib/supabase';
+import { byPhoto, fmt, PROJECT_TYPES, supabase, type Product } from '@/lib/supabase';
 
 export default function ProduitPage() {
   const [p, setP] = useState<Product | null>(null);
@@ -18,7 +18,7 @@ export default function ProduitPage() {
     if (!id) { setState('missing'); return; }
     supabase.from('products').select('*, product_models(*)').eq('id', id).maybeSingle().then(({ data }) => {
       if (!data) { setState('missing'); return; }
-      const x = data as Product; x.product_models = (x.product_models || []).filter((m) => m.active).sort((a, b) => a.sort - b.sort);
+      const x = data as Product; x.product_models = (x.product_models || []).filter((m) => m.active).sort(byPhoto);
       setP(x); setState(x.product_models.length ? 'ok' : 'missing');
     });
   }, []);

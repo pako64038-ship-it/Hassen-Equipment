@@ -6,7 +6,9 @@ import { fmt, type Pack, type Product } from '@/lib/supabase';
 
 /** Product photo, or a clean branded card with the product name when no photo exists yet. */
 export function Img({ src, alt }: { src?: string; alt: string }) {
-  if (src) return <img src={src} alt={alt} loading="lazy" />;
+  if (src) return src.includes('/products/3d/')
+    ? <><img src={src} alt={alt} loading="lazy" /><span className="s-3dtag">صورة 3D</span></>
+    : <img src={src} alt={alt} loading="lazy" />;
   const [main, ...rest] = alt.split(' · ');
   return (
     <span className="s-noimg" role="img" aria-label={alt}>
@@ -23,7 +25,7 @@ export function Img({ src, alt }: { src?: string; alt: string }) {
 }
 
 export function ProductCard({ p, onAdded }: { p: Product; onAdded?: (n: string) => void }) {
-  const [mi, setMi] = useState(() => Math.max(0, p.product_models.findIndex((x) => x.price != null)));
+  const [mi, setMi] = useState(() => { const i = p.product_models.findIndex((x) => x.price != null && x.images.length); return i >= 0 ? i : 0; });
   const m = p.product_models[mi] || p.product_models[0];
   if (!m) return null;
   const img = m.images[0] || p.product_models.find((x) => x.images[0])?.images[0];

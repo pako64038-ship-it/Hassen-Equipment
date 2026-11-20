@@ -63,6 +63,10 @@ export async function loadSettings(): Promise<Settings> {
   return { ...DEFAULT_SETTINGS, ...(data || {}) };
 }
 
+/** 0 = real photo, 1 = 3D picture made from the designer, 2 = no picture. Used to show real photos first. */
+export const photoRank = (m: { images: string[] }) => (!m.images?.length ? 2 : m.images[0].includes('/products/3d/') ? 1 : 0);
+export const byPhoto = <T extends { images: string[]; sort: number }>(a: T, b: T) => photoRank(a) - photoRank(b) || a.sort - b.sort;
+
 export async function loadCatalog(staff = false) {
   const [c, p, k] = await Promise.all([
     supabase.from('categories').select('*').order('sort'),
@@ -72,8 +76,10 @@ export async function loadCatalog(staff = false) {
   const err = c.error || p.error || k.error;
   const products = ((p.data || []) as Product[]).map((x) => ({
     ...x,
-    product_models: (x.product_models || []).filter((m) => staff || m.active).sort((a, b) => a.sort - b.sort),
+    product_models: (x.product_models || []).filter((m) => staff || m.active).sort(staff ? (a, b) => a.sort - b.sort : byPhoto),
   }));
+  // In the store, products with real photos come first.
+  if (!staff) products.sort((a, b) => Math.min(2, ...a.product_models.map(photoRank)) - Math.min(2, ...b.product_models.map(photoRank)) || a.sort - b.sort);
   return {
     error: err ? err.message : null,
     categories: (c.data || []) as Category[],
