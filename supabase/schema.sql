@@ -261,3 +261,21 @@ begin
 end $$;
 
 select 'OK: Hassen Equipment database ready' as result;
+
+-- ============ Delivery, payment and order alerts ============
+alter table public.settings add column if not exists delivery_default numeric(12,2);
+alter table public.settings add column if not exists delivery_prices jsonb not null default '{}';
+alter table public.settings add column if not exists delivery_note text not null default '';
+alter table public.settings add column if not exists pickup boolean not null default true;
+alter table public.settings add column if not exists payments text[] not null default array['cod','ccp','baridimob','store'];
+alter table public.settings add column if not exists ccp text not null default '';
+alter table public.settings add column if not exists rip text not null default '';
+alter table public.orders add column if not exists delivery_mode text not null default 'delivery' check (delivery_mode in ('delivery','pickup'));
+alter table public.orders add column if not exists address text not null default '' check (char_length(address) <= 300);
+alter table public.orders add column if not exists delivery_fee numeric(12,2);
+alter table public.orders add column if not exists payment text not null default '' check (char_length(payment) <= 20);
+do $$ begin
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='orders') then
+    alter publication supabase_realtime add table public.orders;
+  end if;
+end $$;

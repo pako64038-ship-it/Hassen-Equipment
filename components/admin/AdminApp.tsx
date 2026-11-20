@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { SITE_URL, supabase } from '@/lib/supabase';
 import { Logo } from '@/components/Header';
@@ -83,11 +83,36 @@ const TABS = [
   { id: 'settings', label: 'الإعدادات', admin: true },
 ];
 
+function beep() {
+  try {
+    const A = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext; const c = new A();
+    [0, 0.18, 0.36].forEach((t, i) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = [880, 1175, 1568][i];
+      g.gain.setValueAtTime(0.0001, c.currentTime + t); g.gain.exponentialRampToValueAtTime(0.3, c.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + t + 0.16);
+      o.connect(g).connect(c.destination); o.start(c.currentTime + t); o.stop(c.currentTime + t + 0.18); });
+  } catch {}
+}
+
+// Asks once for permission to show a notification on the computer or phone when an order arrives.
+function NotifyBar() {
+  const [perm, setPerm] = useState<string>('granted');
+  useEffect(() => { setPerm('Notification' in window ? Notification.permission : 'unsupported'); }, []);
+  if (perm !== 'default') return null;
+  return (
+    <div className="a-notify">
+      <span>🔔 فعّل التنبيهات باش يجيك صوت وإشعار كي يبعث زبون طلب جديد (خلّي هاذي الصفحة محلولة).</span>
+      <button className="btn small primary" onClick={() => Notification.requestPermission().then((p) => { setPerm(p); if (p === 'granted') beep(); })}>فعّل</button>
+    </div>
+  );
+}
+
 export default function AdminApp() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [recovery, setRecovery] = useState(false);
   const [tab, setTab] = useState('orders');
+  const [fresh, setFresh] = useState(0); // new orders since the panel was opened
+  const [reloadKey, setReloadKey] = useState(0);
+  const title = useRef('');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -100,6 +125,20 @@ export default function AdminApp() {
     setMe((data as Me) || null);
   }, [session]);
   useEffect(() => { loadMe(); }, [loadMe]);
+
+  // Live alert when a customer sends an order: sound, browser notification, badge in the tab title.
+  const staff = !!me && ['admin', 'employee'].includes(me.role);
+  useEffect(() => {
+    if (!staff) return;
+    if (!title.current) title.current = document.title;
+    const ch = supabase.channel('orders-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (p) => {
+      const o = p.new as { number?: number; customer_name?: string; city?: string };
+      setFresh((n) => n + 1); setReloadKey((k) => k + 1); beep();
+      try { if ('Notification' in window && Notification.permission === 'granted') new Notification('طلب جديد #' + (o.number ?? ''), { body: `${o.customer_name || ''} · ${o.city || ''}`, tag: 'order-' + (o.number ?? '') }); } catch {}
+    }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [staff]);
+  useEffect(() => { if (title.current) document.title = fresh ? `(${fresh}) طلب جديد · ${title.current}` : title.current; }, [fresh]);
 
   if (session === undefined) return <div className="a-auth"><p className="s-muted">راهو يحمّل…</p></div>;
   if (recovery && session) return <NewPassword onDone={() => setRecovery(false)} />;
@@ -117,12 +156,13 @@ export default function AdminApp() {
       <header className="a-head">
         <div className="a-head-brand"><Logo /><b>لوحة التحكم</b></div>
         <nav className="a-tabs" role="tablist">
-          {tabs.map((t) => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
+          {tabs.map((t) => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => { setTab(t.id); if (t.id === 'orders') setFresh(0); }}>{t.label}{t.id === 'orders' && fresh > 0 && <span className="a-badge">{fresh}</span>}</button>)}
         </nav>
         <div className="a-me"><span>{me.full_name || me.email}<small>{isAdmin ? 'Admin' : 'Employé'}</small></span><Link href="/" className="btn small">المتجر</Link>{out}</div>
       </header>
       <main className="a-main">
-        {tab === 'orders' && <Orders isAdmin={isAdmin} />}
+        <NotifyBar />
+        {tab === 'orders' && <Orders isAdmin={isAdmin} reloadKey={reloadKey} />}
         {tab === 'products' && <Products />}
         {tab === 'categories' && <Categories />}
         {tab === 'packs' && <Packs />}

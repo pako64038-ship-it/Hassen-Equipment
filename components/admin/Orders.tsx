@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react';
 import { fmt, ORDER_STATUS, PROJECT_TYPES, supabase } from '@/lib/supabase';
 import { Confirm, Flash, useFlash } from './ui';
+import { PAYMENTS } from '@/lib/delivery';
 
 type Order = {
   id: string; number: number; created_at: string; customer_name: string; phone: string; city: string; project_type: string;
-  note: string; items: { name: string; qty: number; price: number | null }[]; total: number; status: string; staff_note: string;
+  note: string; delivery_mode?: string; address?: string; delivery_fee?: number | null; payment?: string; items: { name: string; qty: number; price: number | null }[]; total: number; status: string; staff_note: string;
 };
 
-export default function Orders({ isAdmin }: { isAdmin: boolean }) {
+export default function Orders({ isAdmin, reloadKey = 0 }: { isAdmin: boolean; reloadKey?: number }) {
   const [list, setList] = useState<Order[] | null>(null);
   const [filter, setFilter] = useState('active');
   const [open, setOpen] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export default function Orders({ isAdmin }: { isAdmin: boolean }) {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(300);
     if (error) flash('ما قدرناش نحمّلو الطلبات.'); setList((data as Order[]) || []);
   }
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [reloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
   async function patch(o: Order, v: Partial<Order>) {
     const { error } = await supabase.from('orders').update(v).eq('id', o.id);
     if (error) flash('ما تحفظش.'); else { flash('تحفظ ✓'); setList((l) => (l || []).map((x) => (x.id === o.id ? { ...x, ...v } : x))); }
@@ -56,6 +57,8 @@ export default function Orders({ isAdmin }: { isAdmin: boolean }) {
                   <table className="budget"><tbody>
                     {o.items.map((it, i) => <tr key={i}><td className="nm">{it.name}</td><td className="num">× {it.qty}</td><td className="n num">{fmt(it.price == null ? null : it.price * it.qty)}</td></tr>)}
                   </tbody></table>
+                  <p>{o.delivery_mode === 'pickup' ? '🏬 يجي يديها من المحل' : `🚚 توصيل: ${o.city}${o.address ? ' · ' + o.address : ''} · ${o.delivery_fee == null ? 'السعر يتّفق' : fmt(o.delivery_fee)}`}</p>
+                  {o.payment && <p>💳 الدفع: {PAYMENTS[o.payment]?.label || o.payment}</p>}
                   {o.project_type && <p>المشروع: {PROJECT_TYPES.find((t) => t.id === o.project_type)?.fr}</p>}
                   {o.note && <p>ملاحظة الزبون: {o.note}</p>}
                   <div className="a-form-row">

@@ -32,6 +32,8 @@ export type Settings = {
   store_name: string; tagline: string; hero_title: string; hero_text: string;
   phone: string; whatsapp: string; email: string; address: string;
   facebook: string; instagram: string; logo_url: string; accent: string;
+  delivery_default: number | null; delivery_prices: Record<string, number | null>; delivery_note: string;
+  pickup: boolean; payments: string[]; ccp: string; rip: string;
 };
 export type Category = { id: string; slug: string | null; name_ar: string; name_fr: string; project_types: string[]; sort: number; active: boolean };
 export type Model = {
@@ -53,6 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hero_title: 'جهّز المشروع تاعك من عندنا',
   hero_text: 'معدات Fast Food، Pizzeria، Cafétéria، Pâtisserie وRestaurant. صمّم المحل تاعك بالـ3D واطلب Devis.',
   phone: '0556 55 45 48', whatsapp: '213556554548', email: '', address: '', facebook: '', instagram: '', logo_url: '', accent: '#EE8A2E',
+  delivery_default: null, delivery_prices: {}, delivery_note: '', pickup: true, payments: ['cod', 'ccp', 'baridimob', 'store'], ccp: '', rip: '',
 };
 
 export async function loadSettings(): Promise<Settings> {
