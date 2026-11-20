@@ -95,16 +95,28 @@ export default function Products() {
   const [data, setData] = useState<{ categories: Category[]; products: Product[] } | null>(null);
   const [edit, setEdit] = useState<Product | null | 'new'>(null);
   const [q, setQ] = useState('');
+  const [show, setShow] = useState<'all' | 'visible' | 'hidden'>('all');
   const load = () => loadCatalog(true).then(setData);
   useEffect(() => { load(); }, []);
   if (!data) return <p className="s-muted">راهو يحمّل…</p>;
   if (edit) return <Editor p={edit === 'new' ? null : edit} cats={data.categories} onClose={() => { setEdit(null); load(); }} onChange={load} />;
   const catName = (id: string | null) => data.categories.find((c) => c.id === id)?.name_ar || '—';
-  const list = data.products.filter((p) => !q || p.name.toLowerCase().includes(q.toLowerCase()));
+  const hidden = data.products.filter((p) => !p.active).length;
+  const list = data.products.filter((p) => (!q || p.name.toLowerCase().includes(q.toLowerCase())) && (show === 'all' || (show === 'hidden' ? !p.active : p.active)));
+  async function publish(p: Product, active: boolean) {
+    setData((d) => d && { ...d, products: d.products.map((x) => (x.id === p.id ? { ...x, active } : x)) });
+    const { error } = await supabase.from('products').update({ active }).eq('id', p.id);
+    if (error) load();
+  }
   return (
     <section>
       <div className="a-bar"><h1>المنتجات ({data.products.length})</h1>
         <input className="s-search" type="search" placeholder="ابحث…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
+        <div className="s-chips">
+          <button aria-pressed={show === 'all'} onClick={() => setShow('all')}>الكل ({data.products.length})</button>
+          <button aria-pressed={show === 'visible'} onClick={() => setShow('visible')}>يبانو ({data.products.length - hidden})</button>
+          <button aria-pressed={show === 'hidden'} onClick={() => setShow('hidden')}>مخبّيين ({hidden})</button>
+        </div>
         <button className="btn primary" onClick={() => setEdit('new')}>+ منتج جديد</button></div>
       <div className="a-table-wrap"><table className="budget a-table">
         <thead><tr><th></th><th>المنتج</th><th>القسم</th><th>الموديلات</th><th>السعر</th><th>الحالة</th><th></th></tr></thead>
@@ -119,7 +131,10 @@ export default function Products() {
               <td>{p.product_models.length}</td>
               <td className="num">{prices.length ? fmt(Math.min(...prices)) : 'حسب الطلب'}</td>
               <td>{p.active ? <span className="a-pill ok">يبان</span> : <span className="a-pill">مخبّي</span>}{p.featured && <span className="a-pill">مختار</span>}</td>
-              <td className="row"><button className="btn small" onClick={() => setEdit(p)}>بدّل</button>
+              <td className="row">{p.active
+                  ? <button className="btn small" onClick={() => publish(p, false)} title="الزبائن ما يشوفوهش">إخفاء</button>
+                  : <button className="btn small primary" onClick={() => publish(p, true)} title="الزبائن يشوفوه في الموقع">✓ نشر</button>}
+                <button className="btn small" onClick={() => setEdit(p)}>بدّل</button>
                 <Confirm label="حذف" onYes={async () => { await supabase.from('products').delete().eq('id', p.id); load(); }} /></td>
             </tr>
           );
