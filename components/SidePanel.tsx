@@ -40,13 +40,7 @@ export default function SidePanel() {
   return (
     <aside className="panel side">
       <section className="card">
-        <h2><i>1</i>نوع المشروع <small>Type de projet</small></h2>
-        <p className="lead">اختار نوع المشروع تاعك.</p>
-        <div className="ptypes" id="types" />
-      </section>
-
-      <section className="card">
-        <h2><i>2</i>الأبعاد <small>Dimensions du local</small></h2>
+        <h2><i>1</i>الأبعاد <small>Dimensions du local</small></h2>
         <DimRow id="inL" label="الطول (m)" min={2} max={30} />
         <DimRow id="inW" label="العرض (m)" min={2} max={30} />
         <DimRow id="inH" label="العلو (m)" min={2.4} max={6} />
@@ -63,6 +57,12 @@ export default function SidePanel() {
             <Opening label="النافذة" prefix="win" wMin={0.5} wMax={8} />
           </div>
         </details>
+      </section>
+
+      <section className="card">
+        <h2><i>2</i>نوع المشروع <small>Type de projet</small></h2>
+        <p className="lead">اختار نوع المشروع تاعك.</p>
+        <div className="ptypes" id="types" />
       </section>
 
       <section className="card">
