@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import Shell from '@/components/store/Shell';
 import { Img, Toast } from '@/components/store/Cards';
 import { addToCart } from '@/lib/cart';
+import { useSettings } from '@/components/store/useSettings';
+import { BASE, SITE_URL } from '@/lib/supabase';
 import { byPhoto, fmt, PROJECT_TYPES, supabase, type Product } from '@/lib/supabase';
 
 export default function ProduitPage() {
   const [p, setP] = useState<Product | null>(null);
   const [state, setState] = useState<'loading' | 'ok' | 'missing'>('loading');
+  const st = useSettings();
   const [mi, setMi] = useState(0);
   const [ii, setIi] = useState(0);
   const [qty, setQty] = useState(1);
@@ -56,6 +59,16 @@ export default function ProduitPage() {
               <div className="qty"><button onClick={() => setQty(Math.max(1, qty - 1))} aria-label="نقّص">−</button><span className="num">{qty}</span><button onClick={() => setQty(qty + 1)} aria-label="زيد">+</button></div>
               <button className="btn primary" onClick={() => { addToCart({ kind: 'model', id: m.id, name: `${p.name} · ${m.name}`, price: m.price, image: imgs[0] }, qty); setToast('تزاد للسلة'); setTimeout(() => setToast(''), 2500); }}>زيد للسلة</button>
             </div>
+            <div className="s-pmore">
+              {st.whatsapp && <a className="btn" target="_blank" rel="noopener"
+                href={`https://wa.me/${st.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`السلام، نحب نسقسي على: ${p.name} · ${m.name}\n${SITE_URL}/produit/?id=${p.id}`)}`}>اسقسي بالواتساب</a>}
+              <a className="btn" href={BASE + '/designer/'}>جرّبو في محلّك 3D</a>
+            </div>
+            <ul className="s-pfacts">
+              <li>توصيل لـ58 ولاية، ولا تجي تدّيه من المحل</li>
+              <li>الدفع عند الاستلام، CCP ولا BaridiMob</li>
+              <li>نأكدولك السعر والتوفّر بالتيليفون قبل التوصيل</li>
+            </ul>
           </div>
         </section>
       )}
