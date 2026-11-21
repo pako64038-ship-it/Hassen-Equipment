@@ -674,3 +674,73 @@ body:has(.s-wrap){background:#F7F6F3;color-scheme:light}
 .s-pfacts{list-style:none;margin:6px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:8px;color:var(--muted);font-size:14px}
 .s-pfacts li{display:flex;gap:8px;align-items:baseline}
 .s-pfacts li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;transform:translateY(-2px)}
+
+/* =====================================================================
+   3D designer · light skin (html.dz-light, set by the designer page)
+   Same calm catalogue look as the store: white panels, one accent, no glow.
+   ===================================================================== */
+html.dz-light{
+  --bg:#F3F2EF; --surface:#FFFFFF; --surface-2:#F4F2EE; --ink:#16171A; --muted:#66625B; --line:#E2DFD8;
+  --accent:#E2771A; --accent-soft:#FDF0E3; --accent-ink:#FFFFFF; --ok:#2E8B57; --warn:#B7791F; --bad:#C8463B; --info:#2F6FA8;
+  --scene:#E4E2DD; color-scheme:light;
+}
+html.dz-light body{background:var(--bg)}
+html.dz-light .num{font-family:var(--f-body);font-variant-numeric:tabular-nums lining-nums;font-weight:600}
+html.dz-light .btn{background:var(--surface);border:1px solid var(--line);color:var(--ink);box-shadow:none;border-radius:10px}
+html.dz-light .btn:hover{border-color:#BDB8AF}
+html.dz-light .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:none;filter:none}
+html.dz-light .btn.primary:hover{background:#CC6812;border-color:#CC6812}
+html.dz-light .btn.danger{color:var(--bad)}
+/* header */
+html.dz-light .top{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 14px}
+html.dz-light .brand h1{font-size:19px;color:var(--ink);letter-spacing:0}
+html.dz-light .brand p{color:var(--muted);direction:rtl;text-align:start}
+html.dz-light .logo{width:40px;height:40px}
+/* panels */
+html.dz-light .card{background:#fff;border-color:var(--line);border-radius:14px;padding:14px}
+html.dz-light .card h2{font-weight:700;font-size:15px}
+html.dz-light .card h2 i{background:var(--ink);color:#fff}
+html.dz-light .dimrow input,html.dz-light .field input,html.dz-light .field select,html.dz-light input[type=text]{background:#fff;border:1px solid var(--line);color:var(--ink)}
+html.dz-light .more{background:var(--surface-2);border-color:var(--line)}
+html.dz-light .ptype{background:#fff;border:1px solid var(--line);padding:10px 4px}
+html.dz-light .ptype .em{display:none}
+html.dz-light .ptype b{font-size:13px}
+html.dz-light .ptype[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+html.dz-light .ptype[aria-pressed="true"] small{color:#D6D2CA}
+html.dz-light .style{border-width:1px}
+html.dz-light .style[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+html.dz-light .notes li{background:var(--surface-2)}
+html.dz-light .wallpic{background:var(--surface-2)}
+/* catalogue column */
+html.dz-light .catalog .cathead{background:#fff;border-color:var(--line)}
+html.dz-light .catalog .cathead b{color:var(--ink)}
+html.dz-light .ctabs{background:#fff;border:1px solid var(--line);border-radius:12px}
+html.dz-light .ctabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+html.dz-light .packcard{background:#fff;border-color:var(--line)}
+html.dz-light .packhead .nm span{color:var(--ink)}
+html.dz-light .pitem{background:#fff;border-color:var(--line)}
+html.dz-light .pitem .thumb{border:1px solid var(--line);border-radius:8px}
+html.dz-light .mchip{background:#fff;border-color:var(--line);color:var(--muted)}
+html.dz-light .mchip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+html.dz-light .eqcat h4{color:var(--ink)}
+html.dz-light .qty{background:#fff;border-color:var(--line)}
+html.dz-light .qty button{color:var(--ink)}
+html.dz-light .qty button:hover:not(:disabled){background:var(--surface-2);color:var(--ink)}
+/* 3D stage */
+html.dz-light .stage{border:1px solid var(--line);box-shadow:none;border-radius:14px;background:var(--scene)}
+html.dz-light .glass{background:rgba(255,255,255,.9);border-color:var(--line);backdrop-filter:blur(6px);color:var(--ink)}
+html.dz-light .views button{color:var(--muted)}
+html.dz-light .views button[aria-pressed="true"]{background:var(--ink);color:#fff}
+html.dz-light .views .clearall{color:var(--bad)}
+html.dz-light .hint{color:var(--muted)}
+/* bottom bar */
+html.dz-light .stat{background:#fff;border-color:var(--line)}
+html.dz-light .stat svg{color:var(--muted)}
+html.dz-light .stat.total b{color:var(--ink);font-family:var(--f-body)}
+/* dialogs */
+html.dz-light .modal{background:rgba(22,23,26,.45)}
+html.dz-light .dialog{background:#fff;color:var(--ink)}
+html.dz-light .devis{background:var(--surface-2)}
+html.dz-light .toast{background:var(--ink);color:#fff;border:0}
+.opening .field input,.opening .field select{min-width:0;width:100%;padding:6px 4px;text-align:center}
+.opening.door{grid-template-columns:1.2fr 1fr .8fr .8fr}

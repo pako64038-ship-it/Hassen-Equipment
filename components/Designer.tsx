@@ -9,8 +9,11 @@ import BottomBar from './BottomBar';
 
 export default function Designer() {
   useEffect(() => {
+    // Light, catalogue-style skin (same look as the store); set before the engine reads --scene.
+    document.documentElement.classList.add('dz-light');
     // The 3D engine and catalogue logic run in the browser only.
     import('@/lib/engine').then((m) => m.startEngine());
+    return () => document.documentElement.classList.remove('dz-light');
   }, []);
 
   return (

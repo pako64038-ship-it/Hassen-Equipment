@@ -28,14 +28,12 @@ export default function Header() {
       <div className="brand">
         <Logo />
         <div>
-          <h1>
-            Hassen <b>Equipment</b>
-          </h1>
-          <p>Pack 3D Designer · Concevez · Équipez · Réalisez</p>
+          <h1>Hassen Equipment</h1>
+          <p>صمّم محلّك 3D · Concevez votre local</p>
         </div>
       </div>
       <nav className="top-links">
-        <Link href="/" className="btn small">← المتجر</Link>
+        <Link href="/" className="btn small">المعدات</Link>
         <Link href="/panier/" className="btn small">السلة {count > 0 && <span className="num">({count})</span>}</Link>
       </nav>
     </header>
