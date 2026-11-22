@@ -10,6 +10,14 @@ const emptyModel = (product_id: string, sort: number): Partial<Model> => ({
 function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; onSaved: (m: Model) => void; onDeleted: () => void }) {
   const [v, setV] = useState<Partial<Model>>(m);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  // Saved models start folded; a new one opens. The jump bar and «بيّن الكل / خبّي الكل» open or fold them.
+  const [open, setOpen] = useState(!m.id);
+  useEffect(() => {
+    const onHash = () => { if (location.hash === `#model-${n}`) setOpen(true); };
+    const all = (e: Event) => setOpen((e as CustomEvent<boolean>).detail);
+    window.addEventListener('hashchange', onHash); window.addEventListener('models-all', all);
+    return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('models-all', all); };
+  }, [n]);
   const set = (k: keyof Model, x: unknown) => setV({ ...v, [k]: x });
   async function save() {
     if (!v.name?.trim()) { setErr('اكتب اسم الموديل.'); return; }
@@ -27,11 +35,14 @@ function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; 
   }
   return (
     <div className="a-model" id={`model-${n}`}>
-      <div className="a-model-head">
+      <button type="button" className="a-model-head" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="a-model-n">موديل {n}</span>
         <b>{v.name?.trim() || 'موديل جديد'}</b>
+        {v.active === false && <span className="a-pill">مخبّي</span>}
         {v.price != null && <small className="num">{Number(v.price).toLocaleString('en-US')} DA</small>}
-      </div>
+        <span className="a-model-tog" aria-hidden="true">{open ? 'إخفاء ▲' : 'بيّن ▼'}</span>
+      </button>
+      {open && <>
       <div className="a-form-row">
         <label className="grow">اسم الموديل<input value={v.name || ''} onChange={(e) => set('name', e.target.value)} placeholder="مثلاً: Comaf 2×8 L" /></label>
         <label>السعر (DA)<input type="number" min={0} step={500} value={v.price ?? ''} onChange={(e) => set('price', num(e.target.value))} placeholder="حسب الطلب" /></label>
@@ -53,6 +64,7 @@ function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; 
         {v.id && <Confirm label="حذف الموديل" onYes={async () => { const { error } = await supabase.from('product_models').delete().eq('id', v.id!); if (!error) onDeleted(); }} />}
         {!v.id && <button type="button" className="btn small" onClick={onDeleted}>إلغاء</button>}
       </div>
+      </>}
     </div>
   );
 }
@@ -91,6 +103,12 @@ function Editor({ p, cats, onClose, onChange }: { p: Product | null; cats: Categ
         <div className="a-card">
           <div className="a-bar"><h3>الموديلات ({models.length})</h3><button className="btn small primary" onClick={() => setModels([...models, emptyModel(id, models.length)])}>+ موديل</button></div>
           {!models.length && <p className="s-muted">زيد على الأقل موديل واحد باش يبان المنتج للزبائن.</p>}
+          {models.length > 1 && (
+            <div className="row">
+              <button type="button" className="btn small" onClick={() => window.dispatchEvent(new CustomEvent('models-all', { detail: true }))}>بيّن الكل</button>
+              <button type="button" className="btn small" onClick={() => window.dispatchEvent(new CustomEvent('models-all', { detail: false }))}>خبّي الكل</button>
+            </div>
+          )}
           {models.length > 1 && (
             <nav className="a-model-jump" aria-label="روح لموديل">
               {models.map((m, i) => <a key={m.id || 'j' + i} href={`#model-${i + 1}`}><b>{i + 1}</b> {m.name?.trim() || 'جديد'}</a>)}

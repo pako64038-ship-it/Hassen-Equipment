@@ -780,3 +780,8 @@ html.dz-light .toast{background:var(--ink);color:#fff;border:0}
   .a-me{margin-inline-start:auto}
   .a-me span small{display:none}
 }
+button.a-model-head{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;cursor:pointer;padding-bottom:10px;border-bottom:1px solid var(--line)}
+button.a-model-head[aria-expanded="false"]{border-bottom:0;padding-bottom:0}
+button.a-model-head:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+.a-model-tog{margin-inline-start:auto;font-size:13px;font-weight:600;color:var(--accent);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.a-model-head small{margin-inline-start:0}
