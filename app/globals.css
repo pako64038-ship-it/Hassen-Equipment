@@ -785,3 +785,13 @@ button.a-model-head[aria-expanded="false"]{border-bottom:0;padding-bottom:0}
 button.a-model-head:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
 .a-model-tog{margin-inline-start:auto;font-size:13px;font-weight:600;color:var(--accent);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;white-space:nowrap}
 .a-model-head small{margin-inline-start:0}
+.a-unsaved{background:#5a3a12;color:#FFD08A;border-color:#8a5a1a}
+.a-savebar{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:5;display:flex;justify-content:center;padding-top:6px}
+.a-savebar .btn{width:100%;max-width:520px;padding:12px;font-size:15px;box-shadow:0 8px 24px -8px rgba(0,0,0,.6)}
+/* admin pages never wider than the phone screen */
+.a-wrap,.a-main,.a-editor,.a-card,.a-model{min-width:0;max-width:100%}
+.a-main{overflow-x:clip}
+.a-form-row>label{min-width:0}
+.a-form-row input,.a-form-row select{min-width:0;width:100%}
+.a-model-jump{max-width:100%}
+html:has(.a-wrap),body:has(.a-wrap){overflow-x:hidden}

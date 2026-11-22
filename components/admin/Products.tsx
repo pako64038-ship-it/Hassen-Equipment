@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fmt, loadCatalog, PROJECT_TYPES, supabase, type Category, type Model, type Product } from '@/lib/supabase';
 import { Confirm, Flash, ImagesField, num, TypesPicker, useFlash } from './ui';
 
@@ -7,8 +7,13 @@ const emptyModel = (product_id: string, sort: number): Partial<Model> => ({
   product_id, name: '', price: null, old_price: null, stock: null, width_m: 0.6, depth_m: 0.6, height_m: 0.9, on_counter: false, images: [], sort, active: true,
 });
 
-function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; onSaved: (m: Model) => void; onDeleted: () => void }) {
+type Saver = () => Promise<'same' | 'saved' | 'error'>;
+
+function ModelRow({ m, n, onSaved, onDeleted, register }: { m: Partial<Model>; n: number; onSaved: (m: Model) => void; onDeleted: () => void; register: (key: string, fn: Saver | null) => void }) {
   const [v, setV] = useState<Partial<Model>>(m);
+  // What is in the database now: a model whose fields differ from it is saved by «حفظ المنتج».
+  const [base, setBase] = useState(() => JSON.stringify(m));
+  const dirty = JSON.stringify(v) !== base;
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   // Saved models start folded; a new one opens. The jump bar and «بيّن الكل / خبّي الكل» open or fold them.
   const [open, setOpen] = useState(!m.id);
@@ -19,19 +24,24 @@ function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; 
     return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('models-all', all); };
   }, [n]);
   const set = (k: keyof Model, x: unknown) => setV({ ...v, [k]: x });
-  async function save() {
-    if (!v.name?.trim()) { setErr('اكتب اسم الموديل.'); return; }
+  const regKey = useRef('m' + Math.random().toString(36).slice(2));
+  const latest = useRef<Saver>(async () => 'same');
+  latest.current = async () => (!dirty ? 'same' : !v.name?.trim() && !v.id ? 'same' : (await save()) ? 'saved' : 'error');
+  useEffect(() => { const k = regKey.current; register(k, () => latest.current()); return () => register(k, null); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  async function save(): Promise<boolean> {
+    if (!v.name?.trim()) { setErr('اكتب اسم الموديل.'); setOpen(true); return false; }
     setBusy(true); setErr('');
     const row = { product_id: v.product_id, name: v.name.trim(), price: v.price, old_price: v.old_price, stock: v.stock, width_m: v.width_m, depth_m: v.depth_m, height_m: v.height_m, on_counter: v.on_counter, images: v.images || [], sort: v.sort || 0, active: v.active };
     const q = v.id ? supabase.from('product_models').update(row).eq('id', v.id).select().single() : supabase.from('product_models').insert(row).select().single();
     const { data, error } = await q;
-    if (error) { setBusy(false); setErr('ما تحفظش: ' + error.message); return; }
+    if (error) { setBusy(false); setErr('ما تحفظش: ' + error.message); setOpen(true); return false; }
     const saved = data as Model;
     const w = v.wholesale == null ? await supabase.from('model_wholesale').delete().eq('model_id', saved.id)
       : await supabase.from('model_wholesale').upsert({ model_id: saved.id, price: v.wholesale, updated_at: new Date().toISOString() });
     setBusy(false);
     if (w.error) setErr('الموديل تحفظ، بصح سعر الجملة ما تحفظش: ' + w.error.message);
-    const full = { ...saved, wholesale: v.wholesale ?? null }; setV(full); onSaved(full);
+    const full = { ...saved, wholesale: v.wholesale ?? null }; setV(full); setBase(JSON.stringify(full)); onSaved(full);
+    return !w.error;
   }
   return (
     <div className="a-model" id={`model-${n}`}>
@@ -39,6 +49,7 @@ function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; 
         <span className="a-model-n">موديل {n}</span>
         <b>{v.name?.trim() || 'موديل جديد'}</b>
         {v.active === false && <span className="a-pill">مخبّي</span>}
+        {dirty && <span className="a-pill a-unsaved">ما تحفظش</span>}
         {v.price != null && <small className="num">{Number(v.price).toLocaleString('en-US')} DA</small>}
         <span className="a-model-tog" aria-hidden="true">{open ? 'إخفاء ▲' : 'بيّن ▼'}</span>
       </button>
@@ -74,18 +85,25 @@ function Editor({ p, cats, onClose, onChange }: { p: Product | null; cats: Categ
   const [id, setId] = useState(p?.id || '');
   const [models, setModels] = useState<Partial<Model>[]>(p?.product_models || []);
   const { msg, flash } = useFlash();
-  async function save(e: React.FormEvent) {
-    e.preventDefault(); if (!v.name.trim()) return;
+  const savers = useRef(new Map<string, Saver>());
+  const register = (k: string, fn: Saver | null) => { if (fn) savers.current.set(k, fn); else savers.current.delete(k); };
+  const [busy, setBusy] = useState(false);
+  // One button saves the product and every model that was changed.
+  async function save(e?: React.FormEvent) {
+    e?.preventDefault(); if (!v.name.trim()) return; setBusy(true);
     const row = { ...v, name: v.name.trim(), category_id: v.category_id || null };
     const { data, error } = id ? await supabase.from('products').update(row).eq('id', id).select().single() : await supabase.from('products').insert(row).select().single();
-    if (error) { flash('ما تحفظش: ' + error.message); return; }
-    if (!id) { setId((data as Product).id); setModels([emptyModel((data as Product).id, 0)]); }
-    flash('تحفظ ✓'); onChange();
+    if (error) { setBusy(false); flash('ما تحفظش: ' + error.message); return; }
+    if (!id) { setBusy(false); setId((data as Product).id); setModels([emptyModel((data as Product).id, 0)]); flash('تعمل المنتج ✓ زيد الموديلات تحت'); onChange(); return; }
+    let ok = 0, bad = 0;
+    for (const fn of Array.from(savers.current.values())) { const r = await fn(); if (r === 'saved') ok++; if (r === 'error') bad++; }
+    setBusy(false); onChange();
+    flash(bad ? `المنتج تحفظ، بصح ${bad} موديل ما تحفظش: شوف الأحمر` : ok ? `تحفظ المنتج و${ok} موديل ✓` : 'تحفظ ✓');
   }
   return (
     <div className="a-editor">
       <div className="a-bar"><h2>{id ? 'بدّل المنتج' : 'منتج جديد'}</h2><button className="btn small" onClick={onClose}>← رجوع للقائمة</button></div>
-      <form onSubmit={save} className="a-card">
+      <form onSubmit={save} className="a-card" id="product-form">
         <div className="a-form-row">
           <label className="grow">اسم المنتج<input value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} required placeholder="مثلاً: Friteuse" /></label>
           <label>القسم<select value={v.category_id} onChange={(e) => setV({ ...v, category_id: e.target.value })}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.name_ar}</option>)}</select></label>
@@ -97,7 +115,7 @@ function Editor({ p, cats, onClose, onChange }: { p: Product | null; cats: Categ
           <label className="check"><input type="checkbox" checked={v.featured} onChange={(e) => setV({ ...v, featured: e.target.checked })} /> يبان في الصفحة الرئيسية</label>
           <label className="check"><input type="checkbox" checked={v.active} onChange={(e) => setV({ ...v, active: e.target.checked })} /> يبان للزبائن</label>
         </div>
-        <button className="btn primary">{id ? 'حفظ المنتج' : 'اعمل المنتج'}</button>
+        <button className="btn primary" disabled={busy}>{busy ? 'راهو يحفظ…' : id ? 'حفظ المنتج والموديلات' : 'اعمل المنتج'}</button>
       </form>
       {id && (
         <div className="a-card">
@@ -115,10 +133,11 @@ function Editor({ p, cats, onClose, onChange }: { p: Product | null; cats: Categ
             </nav>
           )}
           {models.map((m, i) => (
-            <ModelRow key={m.id || 'new' + i} n={i + 1} m={m}
-              onSaved={(x) => { setModels(models.map((y, j) => (j === i ? x : y))); flash('تحفظ الموديل ✓'); onChange(); }}
-              onDeleted={() => { setModels(models.filter((_, j) => j !== i)); onChange(); }} />
+            <ModelRow key={m.id || 'new' + i} n={i + 1} m={m} register={register}
+              onSaved={(x) => { setModels((ms) => ms.map((y, j) => (j === i ? x : y))); if (!busy) { flash('تحفظ الموديل ✓'); onChange(); } }}
+              onDeleted={() => { setModels((ms) => ms.filter((_, j) => j !== i)); onChange(); }} />
           ))}
+          <div className="a-savebar"><button type="submit" form="product-form" className="btn primary" disabled={busy}>{busy ? 'راهو يحفظ…' : 'حفظ كلش (المنتج + الموديلات)'}</button></div>
         </div>
       )}
       <Flash msg={msg} />
