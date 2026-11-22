@@ -67,9 +67,23 @@ export default function CatalogView({ home = false }: { home?: boolean }) {
             </select>
           </div>
         </div>
-        <div className="s-tabs-row" role="group" aria-label="القسم">
-          <button aria-pressed={!cat} onClick={() => setCat('')}>الكل</button>
-          {cats.map((c) => <button key={c.id} aria-pressed={cat === c.id} onClick={() => setCat(c.id)}>{c.name_ar}</button>)}
+        <div className="s-cats" role="group" aria-label="القسم">
+          <button className="s-cat" aria-pressed={!cat} onClick={() => setCat('')}>
+            <span className="s-cat-img s-cat-all" aria-hidden="true"><i /><i /><i /><i /></span>
+            <b>الكل</b><small className="num">{(data?.products || []).filter((p) => fitsType(p.project_types)).length}</small>
+          </button>
+          {cats.map((c) => {
+            const ps = (data?.products || []).filter((p) => p.category_id === c.id && fitsType(p.project_types));
+            const img = ps.flatMap((p) => p.product_models.filter((m) => photoRank(m) === 0)).map((m) => m.images[0])[0]
+              || ps.flatMap((p) => p.product_models).find((m) => m.images[0])?.images[0];
+            if (!ps.length) return null;
+            return (
+              <button key={c.id} className="s-cat" aria-pressed={cat === c.id} onClick={() => setCat(c.id)}>
+                <span className="s-cat-img">{img ? <img src={img} alt="" loading="lazy" /> : null}</span>
+                <b>{c.name_ar}</b><small className="num">{ps.length}</small>
+              </button>
+            );
+          })}
         </div>
       </section>
       {err && <p className="s-error">ما قدرناش نحمّلو المعدات. عاود حلّ الصفحة بعد شوية.</p>}
