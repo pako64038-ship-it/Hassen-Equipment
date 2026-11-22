@@ -7,7 +7,7 @@ const emptyModel = (product_id: string, sort: number): Partial<Model> => ({
   product_id, name: '', price: null, old_price: null, stock: null, width_m: 0.6, depth_m: 0.6, height_m: 0.9, on_counter: false, images: [], sort, active: true,
 });
 
-function ModelRow({ m, onSaved, onDeleted }: { m: Partial<Model>; onSaved: (m: Model) => void; onDeleted: () => void }) {
+function ModelRow({ m, n, onSaved, onDeleted }: { m: Partial<Model>; n: number; onSaved: (m: Model) => void; onDeleted: () => void }) {
   const [v, setV] = useState<Partial<Model>>(m);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   const set = (k: keyof Model, x: unknown) => setV({ ...v, [k]: x });
@@ -26,7 +26,12 @@ function ModelRow({ m, onSaved, onDeleted }: { m: Partial<Model>; onSaved: (m: M
     const full = { ...saved, wholesale: v.wholesale ?? null }; setV(full); onSaved(full);
   }
   return (
-    <div className="a-model">
+    <div className="a-model" id={`model-${n}`}>
+      <div className="a-model-head">
+        <span className="a-model-n">موديل {n}</span>
+        <b>{v.name?.trim() || 'موديل جديد'}</b>
+        {v.price != null && <small className="num">{Number(v.price).toLocaleString('en-US')} DA</small>}
+      </div>
       <div className="a-form-row">
         <label className="grow">اسم الموديل<input value={v.name || ''} onChange={(e) => set('name', e.target.value)} placeholder="مثلاً: Comaf 2×8 L" /></label>
         <label>السعر (DA)<input type="number" min={0} step={500} value={v.price ?? ''} onChange={(e) => set('price', num(e.target.value))} placeholder="حسب الطلب" /></label>
@@ -86,8 +91,13 @@ function Editor({ p, cats, onClose, onChange }: { p: Product | null; cats: Categ
         <div className="a-card">
           <div className="a-bar"><h3>الموديلات ({models.length})</h3><button className="btn small primary" onClick={() => setModels([...models, emptyModel(id, models.length)])}>+ موديل</button></div>
           {!models.length && <p className="s-muted">زيد على الأقل موديل واحد باش يبان المنتج للزبائن.</p>}
+          {models.length > 1 && (
+            <nav className="a-model-jump" aria-label="روح لموديل">
+              {models.map((m, i) => <a key={m.id || 'j' + i} href={`#model-${i + 1}`}><b>{i + 1}</b> {m.name?.trim() || 'جديد'}</a>)}
+            </nav>
+          )}
           {models.map((m, i) => (
-            <ModelRow key={m.id || 'new' + i} m={m}
+            <ModelRow key={m.id || 'new' + i} n={i + 1} m={m}
               onSaved={(x) => { setModels(models.map((y, j) => (j === i ? x : y))); flash('تحفظ الموديل ✓'); onChange(); }}
               onDeleted={() => { setModels(models.filter((_, j) => j !== i)); onChange(); }} />
           ))}
