@@ -795,3 +795,5 @@ button.a-model-head:focus-visible{outline:2px solid var(--accent);outline-offset
 .a-form-row input,.a-form-row select{min-width:0;width:100%}
 .a-model-jump{max-width:100%}
 html:has(.a-wrap),body:has(.a-wrap){overflow-x:hidden}
+.views .arrange{color:var(--accent);font-weight:700}
+html.dz-light .views .arrange{color:var(--accent)}

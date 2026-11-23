@@ -10,11 +10,12 @@ export default function Stage() {
         <div className="views glass" role="group" aria-label="زاوية الكاميرا">
           <button id="v3d" aria-pressed="true">3D</button>
           <button id="vtop" aria-pressed="false">المخطط</button>
+          <button data-arrange className="arrange" title="رتّب المعدات حذا الحيطان">رتّب وحدو</button>
           <button data-clearall className="clearall" title="نحّي كامل المعدات من المحل">حذف الكل</button>
         </div>
       </div>
       <div className="toast glass" id="toast" hidden />
-      <div className="hint glass" id="hint">اسحب قطعة باش تحركها · اضغط عليها باش تدوّرها ولا تحذفها</div>
+      <div className="hint glass" id="hint">اضغط «رتّب وحدو» ولا اسحب أي قطعة · كي تقرّبها للحيط تلصق وحدها</div>
       <div className="selbar glass" id="selbar" hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img id="selImg" className="selimg" alt="" />
