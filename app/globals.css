@@ -798,3 +798,4 @@ html:has(.a-wrap),body:has(.a-wrap){overflow-x:hidden}
 .views .arrange{color:var(--accent);font-weight:700}
 html.dz-light .views .arrange{color:var(--accent)}
 .ctabs:has(> :only-child){grid-template-columns:1fr}
+.s-foot-in>div{align-items:flex-start}.s-foot-in a.num{text-align:start}
