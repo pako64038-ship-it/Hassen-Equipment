@@ -15,7 +15,7 @@ export default function Stage() {
         </div>
       </div>
       <div className="toast glass" id="toast" hidden />
-      <div className="hint glass" id="hint">اضغط «رتّب وحدو» ولا اسحب أي قطعة · كي تقرّبها للحيط تلصق وحدها</div>
+      <div className="hint glass" id="hint">زيد المعدات من القائمة بـ«+» · من بعد «رتّب وحدو» ولا اسحبهم، وكي تقرّبهم للحيط يلصقو وحدهم</div>
       <div className="selbar glass" id="selbar" hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img id="selImg" className="selimg" alt="" />
