@@ -21,7 +21,7 @@ export default function CatalogView({ home = false }: { home?: boolean }) {
     fitsType(p.project_types) && (!cat || p.category_id === cat) &&
     (!q || (p.name + ' ' + p.product_models.map((m) => m.name).join(' ')).toLowerCase().includes(q.toLowerCase()))
   ), [data, type, cat, q]); // eslint-disable-line react-hooks/exhaustive-deps
-  const packs = (data?.packs || []).filter((k) => fitsType(k.project_types) && !cat && !q);
+  const packs = (data?.packs || []).filter((k) => k.active && fitsType(k.project_types) && !cat && !q);
   const modelInfo: Record<string, { name: string; image?: string; price: number | null }> = {};
   data?.products.forEach((p) => p.product_models.forEach((x) => (modelInfo[x.id] = { name: `${p.name} · ${x.name}`, image: x.images[0], price: x.price == null ? null : Number(x.price) })));
   const added = (n: string) => { setToast(`تزاد للسلة: ${n}`); setTimeout(() => setToast(''), 2500); };
