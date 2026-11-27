@@ -24,6 +24,13 @@ export function Img({ src, alt }: { src?: string; alt: string }) {
   );
 }
 
+/** «اسم عربي · Nom français» shows as two lines, each in its own direction. */
+export function PName({ name }: { name: string }) {
+  const i = name.indexOf(' · ');
+  if (i < 0) return <>{name}</>;
+  return <><span className="pn-ar">{name.slice(0, i)}</span><span className="pn-fr">{name.slice(i + 3)}</span></>;
+}
+
 export function ProductCard({ p, onAdded }: { p: Product; onAdded?: (n: string) => void }) {
   const [mi, setMi] = useState(() => { const i = p.product_models.findIndex((x) => x.price != null && x.images.length); return i >= 0 ? i : 0; });
   const m = p.product_models[mi] || p.product_models[0];
@@ -33,7 +40,7 @@ export function ProductCard({ p, onAdded }: { p: Product; onAdded?: (n: string) 
     <article className="s-card">
       <Link href={`/produit/?id=${p.id}`} className="s-card-img"><Img src={img} alt={p.name} /></Link>
       <div className="s-card-body">
-        <h3><Link href={`/produit/?id=${p.id}`}>{p.name}</Link></h3>
+        <h3><Link href={`/produit/?id=${p.id}`}><PName name={p.name} /></Link></h3>
         {p.product_models.length > 1 ? (
           <div className="s-models" role="group" aria-label="الموديل">
             {p.product_models.map((x, i) => (

@@ -2,11 +2,11 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Shell from '@/components/store/Shell';
-import { Img, Toast } from '@/components/store/Cards';
+import { Img, PName, ProductCard, Toast } from '@/components/store/Cards';
 import { addToCart } from '@/lib/cart';
 import { useSettings } from '@/components/store/useSettings';
 import { BASE, SITE_URL } from '@/lib/supabase';
-import { byPhoto, fmt, PROJECT_TYPES, supabase, type Product } from '@/lib/supabase';
+import { byPhoto, fmt, loadCatalog, PROJECT_TYPES, supabase, type Product } from '@/lib/supabase';
 
 export default function ProduitPage() {
   const [p, setP] = useState<Product | null>(null);
@@ -16,6 +16,7 @@ export default function ProduitPage() {
   const [ii, setIi] = useState(0);
   const [qty, setQty] = useState(1);
   const [toast, setToast] = useState('');
+  const [related, setRelated] = useState<Product[]>([]);
   useEffect(() => {
     const id = new URLSearchParams(location.search).get('id');
     if (!id) { setState('missing'); return; }
@@ -23,6 +24,14 @@ export default function ProduitPage() {
       if (!data) { setState('missing'); return; }
       const x = data as Product; x.product_models = (x.product_models || []).filter((m) => m.active).sort(byPhoto);
       setP(x); setState(x.product_models.length ? 'ok' : 'missing');
+      document.title = `${x.name} · Hassen Equipment`;
+      // Similar products: same category first, then products for the same kind of shop.
+      loadCatalog().then((d) => {
+        const others = d.products.filter((o) => o.id !== x.id);
+        const same = others.filter((o) => o.category_id === x.category_id);
+        const near = others.filter((o) => o.category_id !== x.category_id && o.project_types.some((t) => x.project_types.includes(t)));
+        setRelated([...same, ...near].slice(0, 8));
+      }).catch(() => {});
     });
   }, []);
   const m = p?.product_models[mi];
@@ -41,7 +50,7 @@ export default function ProduitPage() {
           </div>
           <div className="s-pinfo">
             <Link href="/produits/" className="s-muted">← المعدات</Link>
-            <h1>{p.name}</h1>
+            <h1><PName name={p.name} /></h1>
             {p.project_types?.length > 0 && <p className="s-muted">يصلح لـ: {p.project_types.map((t) => PROJECT_TYPES.find((x) => x.id === t)?.fr).filter(Boolean).join('، ')}</p>}
             {p.product_models.length > 1 && <>
               <h2 className="s-label">الموديل</h2>
@@ -70,6 +79,12 @@ export default function ProduitPage() {
               <li>نأكدولك السعر والتوفّر بالتيليفون قبل التوصيل</li>
             </ul>
           </div>
+        </section>
+      )}
+      {related.length > 0 && (
+        <section className="s-sec s-related" onClickCapture={(e) => { const a = (e.target as HTMLElement).closest('a[href*="produit"]') as HTMLAnchorElement | null; if (a) { e.preventDefault(); location.href = a.href; } }}>
+          <h2 className="s-h2">منتجات قريبة <small>من نفس القسم</small></h2>
+          <div className="s-grid">{related.map((r) => <ProductCard key={r.id} p={r} onAdded={(n) => { setToast(`تزاد للسلة: ${n}`); setTimeout(() => setToast(''), 2500); }} />)}</div>
         </section>
       )}
       <Toast text={toast} />

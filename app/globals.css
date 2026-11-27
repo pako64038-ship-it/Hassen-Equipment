@@ -799,3 +799,13 @@ html:has(.a-wrap),body:has(.a-wrap){overflow-x:hidden}
 html.dz-light .views .arrange{color:var(--accent)}
 .ctabs:has(> :only-child){grid-template-columns:1fr}
 .s-foot-in>div{align-items:flex-start}.s-foot-in a.num{text-align:start}
+/* floating WhatsApp contact */
+.s-wa{position:fixed;z-index:40;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:12px 18px 12px 14px;box-shadow:0 10px 28px -10px rgba(0,0,0,.45)}
+.s-wa svg{width:26px;height:26px}
+.s-wa:hover{background:#1ebe5b}
+@media (max-width:640px){.s-wa span{display:none}.s-wa{padding:14px}}
+/* product names mix Arabic and French: let each name pick its own direction, always right-aligned */
+.s-wrap .s-pinfo h1,.s-wrap .s-card-body h3,.s-pack-nm,.s-line-nm b{unicode-bidi:plaintext;text-align:right}
+.pn-ar,.pn-fr{display:block}
+.pn-ar{direction:rtl}
+.pn-fr{direction:ltr;text-align:right;font-size:.78em;font-weight:500;color:var(--muted)}
